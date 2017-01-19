@@ -1,0 +1,73 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+)
+
+var schema = `
+CREATE TABLE IF NOT EXISTS users (
+	id serial PRIMARY KEY,
+  email VARCHAR(40) not null,
+  password VARCHAR(40) not null,
+  reg_date DATE
+);
+
+CREATE TABLE IF NOT EXISTS photos (
+	id serial PRIMARY KEY,
+  photo_name VARCHAR(40),
+  filename VARCHAR(40) not null,
+  create_date DATE
+);
+
+CREATE TABLE IF NOT EXISTS  albums (
+	id serial PRIMARY KEY,
+  photo_name VARCHAR(40),
+  create_date DATE
+)`
+
+// User struct
+type User struct {
+	email    string `db:"email"`
+	password string `db:"password"`
+	regDate  string `db:"reg_date"`
+}
+
+// Photo struct
+type Photo struct {
+	Country string
+	City    sql.NullString
+	TelCode int
+}
+
+func initDB(config instanceConfig) {
+
+	dbinfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", config.Pgsql.Host, config.Pgsql.Port,
+		config.Pgsql.Username, config.Pgsql.Password, config.Pgsql.Database)
+	log.Println(dbinfo)
+	db, err := sqlx.Connect("postgres", dbinfo)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	} else {
+		log.Println("conection to DB success")
+	}
+
+	db.MustExec(schema)
+}
+
+// CreateUser create user
+func CreateUser(Email, Passwor string) {
+
+
+	log.Println("create user")
+}
